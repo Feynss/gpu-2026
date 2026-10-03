@@ -24,12 +24,25 @@ namespace {
 constexpr int kBlockX = 16;
 constexpr int kBlockY = 16;
 
-constexpr int kTile = 4;  
+constexpr int kTile = 4;
 constexpr int kBlockDimX = kBlockX * kTile; // 64 columns per block
 constexpr int kBlockDimY = kBlockY * kTile; // 64 rows per block
 
-__device__ __forceinline__ float4 load_float4(const float* p) {
+__device__ __forceinline__ const float4& vec4(const float* p) {
     return *reinterpret_cast<const float4*>(p);
+}
+
+__device__ __forceinline__ float4& vec4(float* p) {
+    return *reinterpret_cast<float4*>(p);
+}
+
+__device__ __forceinline__ void fma_row(float4& acc, const float4& a,
+                                        const float4& b0, const float4& b1,
+                                        const float4& b2, const float4& b3) {
+    acc.x += a.x * b0.x + a.y * b1.x + a.z * b2.x + a.w * b3.x;
+    acc.y += a.x * b0.y + a.y * b1.y + a.z * b2.y + a.w * b3.y;
+    acc.z += a.x * b0.z + a.y * b1.z + a.z * b2.z + a.w * b3.z;
+    acc.w += a.x * b0.w + a.y * b1.w + a.z * b2.w + a.w * b3.w;
 }
 
 __global__ void naive_gemm_reg4x4_kernel(const float* __restrict__ a,
@@ -56,45 +69,21 @@ __global__ void naive_gemm_reg4x4_kernel(const float* __restrict__ a,
     const float* a_row2 = a + static_cast<std::size_t>(row_start + 2) * n;
     const float* a_row3 = a + static_cast<std::size_t>(row_start + 3) * n;
 
-    for (int k = 0; k < n; k += 4) {
-        float4 a0 = load_float4(a_row0 + k);
-        float4 a1 = load_float4(a_row1 + k);
-        float4 a2 = load_float4(a_row2 + k);
-        float4 a3 = load_float4(a_row3 + k);
+    for (int k = 0; k < n; k += kTile) {
+        const float4 a0 = vec4(a_row0 + k);
+        const float4 a1 = vec4(a_row1 + k);
+        const float4 a2 = vec4(a_row2 + k);
+        const float4 a3 = vec4(a_row3 + k);
 
-        const float* b_row0 = b + static_cast<std::size_t>(k + 0) * n + col_start;
-        const float* b_row1 = b + static_cast<std::size_t>(k + 1) * n + col_start;
-        const float* b_row2 = b + static_cast<std::size_t>(k + 2) * n + col_start;
-        const float* b_row3 = b + static_cast<std::size_t>(k + 3) * n + col_start;
+        const float4 b0 = vec4(b + static_cast<std::size_t>(k + 0) * n + col_start);
+        const float4 b1 = vec4(b + static_cast<std::size_t>(k + 1) * n + col_start);
+        const float4 b2 = vec4(b + static_cast<std::size_t>(k + 2) * n + col_start);
+        const float4 b3 = vec4(b + static_cast<std::size_t>(k + 3) * n + col_start);
 
-        float4 b0 = load_float4(b_row0);
-        float4 b1 = load_float4(b_row1);
-        float4 b2 = load_float4(b_row2);
-        float4 b3 = load_float4(b_row3);
-
-        // Row 0
-        acc0.x += a0.x * b0.x + a0.y * b1.x + a0.z * b2.x + a0.w * b3.x;
-        acc0.y += a0.x * b0.y + a0.y * b1.y + a0.z * b2.y + a0.w * b3.y;
-        acc0.z += a0.x * b0.z + a0.y * b1.z + a0.z * b2.z + a0.w * b3.z;
-        acc0.w += a0.x * b0.w + a0.y * b1.w + a0.z * b2.w + a0.w * b3.w;
-
-        // Row 1
-        acc1.x += a1.x * b0.x + a1.y * b1.x + a1.z * b2.x + a1.w * b3.x;
-        acc1.y += a1.x * b0.y + a1.y * b1.y + a1.z * b2.y + a1.w * b3.y;
-        acc1.z += a1.x * b0.z + a1.y * b1.z + a1.z * b2.z + a1.w * b3.z;
-        acc1.w += a1.x * b0.w + a1.y * b1.w + a1.z * b2.w + a1.w * b3.w;
-
-        // Row 2
-        acc2.x += a2.x * b0.x + a2.y * b1.x + a2.z * b2.x + a2.w * b3.x;
-        acc2.y += a2.x * b0.y + a2.y * b1.y + a2.z * b2.y + a2.w * b3.y;
-        acc2.z += a2.x * b0.z + a2.y * b1.z + a2.z * b2.z + a2.w * b3.z;
-        acc2.w += a2.x * b0.w + a2.y * b1.w + a2.z * b2.w + a2.w * b3.w;
-
-        // Row 3
-        acc3.x += a3.x * b0.x + a3.y * b1.x + a3.z * b2.x + a3.w * b3.x;
-        acc3.y += a3.x * b0.y + a3.y * b1.y + a3.z * b2.y + a3.w * b3.y;
-        acc3.z += a3.x * b0.z + a3.y * b1.z + a3.z * b2.z + a3.w * b3.z;
-        acc3.w += a3.x * b0.w + a3.y * b1.w + a3.z * b2.w + a3.w * b3.w;
+        fma_row(acc0, a0, b0, b1, b2, b3);
+        fma_row(acc1, a1, b0, b1, b2, b3);
+        fma_row(acc2, a2, b0, b1, b2, b3);
+        fma_row(acc3, a3, b0, b1, b2, b3);
     }
 
     float* c_row0 = c + static_cast<std::size_t>(row_start + 0) * n + col_start;
@@ -102,10 +91,10 @@ __global__ void naive_gemm_reg4x4_kernel(const float* __restrict__ a,
     float* c_row2 = c + static_cast<std::size_t>(row_start + 2) * n + col_start;
     float* c_row3 = c + static_cast<std::size_t>(row_start + 3) * n + col_start;
 
-    *reinterpret_cast<float4*>(c_row0) = acc0;
-    *reinterpret_cast<float4*>(c_row1) = acc1;
-    *reinterpret_cast<float4*>(c_row2) = acc2;
-    *reinterpret_cast<float4*>(c_row3) = acc3;
+    vec4(c_row0) = acc0;
+    vec4(c_row1) = acc1;
+    vec4(c_row2) = acc2;
+    vec4(c_row3) = acc3;
 }
 
 // for n < 4
