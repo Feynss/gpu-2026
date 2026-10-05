@@ -474,6 +474,7 @@ std::vector<float> GeluOCL(const std::vector<float>& input, int platform) {
 ## 4_block_gemm_cuda (4096 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
+|3823B1PE1|shilin_nikita|0.0383|3|
 |3823B1PE1|redkina_alina|0.0631|1|
 |**FAST**|**FAST**|**0.0701**|**-**|
 |3823B1PE2|klimenko_vladislav|0.0842|1|
@@ -525,9 +526,9 @@ Passed: 0
 |-----|----|------|-----|
 |3823B1PE1|morozov_nikita|1/8|59|
 |3823B1PE1|otcheskov_semyon|3/8|179|
-|3823B1PE1|redkina_alina|6/8|377|
-|3823B1PE1|rusakova_aleksandra|4/8|245|
-|3823B1PE1|shilin_nikita|2/8|117|
+|3823B1PE1|redkina_alina|6/8|376|
+|3823B1PE1|rusakova_aleksandra|4/8|244|
+|3823B1PE1|shilin_nikita|3/8|179|
 |3823B1PE1|tsibareva_ekaterina|2/8|119|
 
 Passed: 0
