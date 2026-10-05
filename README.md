@@ -428,6 +428,7 @@ std::vector<float> GeluOCL(const std::vector<float>& input, int platform) {
 |3823B1PE1|tsibareva_ekaterina|0.2378|4|
 |3823B1PE3|dergachev_arseniy|0.2386|1|
 |3823B1PE2|kolotukhin_alexander|0.2394|3|
+|3823B1PE3|batkov_filipp|0.2535|2|
 |3823B1PE2|sinev_artem|0.2567|1|
 |3823B1PE2|klimenko_vladislav|0.2611|2|
 |3823B1PE1|redkina_alina|0.2634|2|
@@ -446,6 +447,7 @@ std::vector<float> GeluOCL(const std::vector<float>& input, int platform) {
 |3823B1PE2|zorin_danila_artemovich|0.2690|2|
 |**REF**|**REF**|**0.2717**|**-**|
 |3823B1PE2|klimenko_vladislav|0.2741|3|
+|3823B1PE3|batkov_filipp|0.2750|2|
 |3823B1PE1|tsibareva_ekaterina|0.2788|2|
 
 ## 3_naive_gemm_cuda (4096 elements)
@@ -511,6 +513,7 @@ Passed: 0
 ## 3823B1PE3
 |Group|Name|Passed|Score|
 |-----|----|------|-----|
+|3823B1PE3|batkov_filipp|2/8|124|
 |3823B1PE3|dergachev_arseniy|2/8|128|
 
 Passed: 0
