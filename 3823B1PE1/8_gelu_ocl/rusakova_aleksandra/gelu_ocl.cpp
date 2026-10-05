@@ -1,7 +1,10 @@
 #include "gelu_ocl.h"
 
 #define CL_TARGET_OPENCL_VERSION 120
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
+
+#include <vector>
 
 namespace {
 
@@ -14,7 +17,7 @@ __kernel void gelu_vec4(__global const float* in, __global float* out, int n4) {
     const float4 x = vload4(i, in);
     const float4 x2 = x * x;
     const float4 arg = -1.5957691216057308f * x * (1.0f + 0.044715f * x2);
-    vstore4(x / (1.0f + native_exp(arg)), i, out);
+    vstore4(x / (1.0f + exp(arg)), i, out);
 }
 
 __kernel void gelu_tail(__global const float* in, __global float* out, int start, int n) {
@@ -24,7 +27,7 @@ __kernel void gelu_tail(__global const float* in, __global float* out, int start
     }
     const float x = in[i];
     const float x2 = x * x;
-    out[i] = x / (1.0f + native_exp(-1.5957691216057308f * x * (1.0f + 0.044715f * x2)));
+    out[i] = x / (1.0f + exp(-1.5957691216057308f * x * (1.0f + 0.044715f * x2)));
 }
 )CLC";
 
@@ -84,30 +87,66 @@ struct OclState {
 
         cl_uint num_platforms = 0;
         clGetPlatformIDs(0, nullptr, &num_platforms);
-        cl_platform_id platforms[16];
-        clGetPlatformIDs(num_platforms, platforms, nullptr);
+        if (num_platforms == 0 || platform < 0 ||
+            static_cast<cl_uint>(platform) >= num_platforms) {
+            return;
+        }
+
+        std::vector<cl_platform_id> platforms(num_platforms);
+        clGetPlatformIDs(num_platforms, platforms.data(), nullptr);
 
         cl_device_id device = nullptr;
-        clGetDeviceIDs(platforms[platform], CL_DEVICE_TYPE_GPU, 1, &device, nullptr);
+        cl_int err = clGetDeviceIDs(platforms[platform], CL_DEVICE_TYPE_GPU, 1, &device, nullptr);
+        if (err != CL_SUCCESS || device == nullptr) {
+            return;
+        }
 
-        context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, nullptr);
-        queue = clCreateCommandQueue(context, device, 0, nullptr);
+        cl_context_properties props[] = {
+            CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platforms[platform]), 0};
+        context = clCreateContext(props, 1, &device, nullptr, nullptr, &err);
+        if (err != CL_SUCCESS || context == nullptr) {
+            return;
+        }
+
+        queue = clCreateCommandQueue(context, device, 0, &err);
+        if (err != CL_SUCCESS || queue == nullptr) {
+            release_all();
+            return;
+        }
 
         const char* src = kKernelSource;
-        program = clCreateProgramWithSource(context, 1, &src, nullptr, nullptr);
-        clBuildProgram(program, 1, &device, "-cl-fast-relaxed-math", nullptr, nullptr);
-        kernel_vec4 = clCreateKernel(program, "gelu_vec4", nullptr);
-        kernel_tail = clCreateKernel(program, "gelu_tail", nullptr);
+        program = clCreateProgramWithSource(context, 1, &src, nullptr, &err);
+        if (err != CL_SUCCESS) {
+            release_all();
+            return;
+        }
+        err = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
+        if (err != CL_SUCCESS) {
+            release_all();
+            return;
+        }
+
+        kernel_vec4 = clCreateKernel(program, "gelu_vec4", &err);
+        kernel_tail = clCreateKernel(program, "gelu_tail", &err);
+        if (kernel_vec4 == nullptr || kernel_tail == nullptr) {
+            release_all();
+            return;
+        }
         platform_index = platform;
     }
 
     void ensure(size_t n) {
-        if (n <= cap) {
+        if (context == nullptr || n <= cap) {
             return;
         }
         release_buffers();
-        d_in = clCreateBuffer(context, CL_MEM_READ_ONLY, n * sizeof(float), nullptr, nullptr);
-        d_out = clCreateBuffer(context, CL_MEM_WRITE_ONLY, n * sizeof(float), nullptr, nullptr);
+        cl_int err = CL_SUCCESS;
+        d_in = clCreateBuffer(context, CL_MEM_READ_ONLY, n * sizeof(float), nullptr, &err);
+        d_out = clCreateBuffer(context, CL_MEM_WRITE_ONLY, n * sizeof(float), nullptr, &err);
+        if (d_in == nullptr || d_out == nullptr) {
+            release_buffers();
+            return;
+        }
         cap = n;
     }
 };
@@ -128,6 +167,9 @@ std::vector<float> GeluOCL(const std::vector<float>& input, int platform) {
     auto& s = state();
     s.init(platform);
     s.ensure(static_cast<size_t>(n));
+    if (s.queue == nullptr || s.d_in == nullptr || s.d_out == nullptr) {
+        return std::vector<float>(static_cast<size_t>(n), 0.f);
+    }
 
     clEnqueueWriteBuffer(s.queue, s.d_in, CL_FALSE, 0, static_cast<size_t>(n) * sizeof(float),
                          input.data(), 0, nullptr, nullptr);
