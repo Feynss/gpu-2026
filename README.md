@@ -425,91 +425,160 @@ std::vector<float> GeluOCL(const std::vector<float>& input, int platform) {
 |-----|----|------|----|
 |**FAST**|**FAST**|**0.1741**|**-**|
 |3823B1PE1|rusakova_aleksandra|0.2258|3|
+|3823B1PE1|otcheskov_semyon|0.2367|5|
 |3823B1PE1|tsibareva_ekaterina|0.2378|4|
 |3823B1PE3|dergachev_arseniy|0.2386|1|
 |3823B1PE2|kolotukhin_alexander|0.2394|3|
+|3823B1FI1|zenin_anton|0.2408|1|
+|3823B1PE2|vasiliev_mikhail|0.2529|5|
+|3823B1PE1|shilin_nikita|0.2532|6|
+|3823B1PE3|batkov_filipp|0.2535|2|
 |3823B1PE2|sinev_artem|0.2567|1|
+|3823B1FI1|kosolapov_vitaliy|0.2568|2|
+|3823B1PE1|zhurin_ivan|0.2580|7|
+|3823B1PE2|kotelnikova_anastasia|0.2591|6|
 |3823B1PE2|klimenko_vladislav|0.2611|2|
 |3823B1PE1|redkina_alina|0.2634|2|
+|3823B1FI2|chyokotov_alexey|0.2675|1|
 |3823B1PE2|zorin_danila_artemovich|0.4702|4|
 |3823B1PE1|morozov_nikita|0.4711|1|
+|3823B1PE4|zaharov_gleb|0.4929|1|
 |**REF**|**REF**|**0.5440**|**-**|
+|3823B1PE3|marin_lev|TEST FAILED|-|
 
 ## 2_gelu_cuda (134217728 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
 |**FAST**|**FAST**|**0.2067**|**-**|
+|3823B1FI1|zenin_anton|0.2104|1|
+|3823B1PE1|shilin_nikita|0.2111|5|
+|3823B1PE3|dergachev_arseniy|0.2192|1|
 |3823B1PE1|redkina_alina|0.2390|1|
 |3823B1PE2|sinev_artem|0.2406|1|
+|3823B1PE1|rusakova_aleksandra|0.2437|3|
+|3823B1PE1|otcheskov_semyon|0.2500|4|
+|3823B1PE4|zaharov_gleb|0.2575|1|
+|3823B1PE2|zorin_danila_artemovich|0.2690|2|
 |**REF**|**REF**|**0.2717**|**-**|
+|3823B1PE2|klimenko_vladislav|0.2741|3|
+|3823B1PE3|batkov_filipp|0.2750|2|
 |3823B1PE1|tsibareva_ekaterina|0.2788|2|
+|3823B1PE3|marin_lev|TEST FAILED|-|
 
 ## 3_naive_gemm_cuda (4096 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
+|3823B1PE1|shilin_nikita|0.0487|4|
+|3823B1PE1|otcheskov_semyon|0.0664|3|
 |3823B1PE1|redkina_alina|0.0712|1|
 |**FAST**|**FAST**|**0.0732**|**-**|
+|3823B1PE1|rusakova_aleksandra|0.0927|2|
+|3823B1PE2|klimenko_vladislav|0.1138|1|
+|3823B1PE2|zorin_danila_artemovich|0.2092|2|
 |**REF**|**REF**|**0.5864**|**-**|
 
 ## 4_block_gemm_cuda (4096 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
+|3823B1PE1|shilin_nikita|0.0383|3|
+|3823B1PE1|otcheskov_semyon|0.0611|4|
 |3823B1PE1|redkina_alina|0.0631|1|
 |**FAST**|**FAST**|**0.0701**|**-**|
+|3823B1PE2|klimenko_vladislav|0.0842|1|
+|3823B1PE2|zorin_danila_artemovich|0.1461|2|
+|3823B1PE1|rusakova_aleksandra|0.1805|2|
 |**REF**|**REF**|**0.3076**|**-**|
 
 ## 5_gemm_cublas (4096 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
+|3823B1PE1|redkina_alina|0.0359|1|
+|3823B1PE1|rusakova_aleksandra|0.0370|2|
 |**FAST**|**FAST**|**0.0417**|**-**|
+|3823B1PE2|klimenko_vladislav|0.0563|1|
 |**REF**|**REF**|**0.0591**|**-**|
 
 ## 6_softmax_cuda (8192x16384 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
 |**FAST**|**FAST**|**0.2142**|**-**|
+|3823B1PE1|redkina_alina|0.2432|1|
+|3823B1PE1|rusakova_aleksandra|0.2446|2|
 |**REF**|**REF**|**0.2707**|**-**|
 
 ## 7_layernorm_pycuda (8192x16384 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
+|3823B1PE1|rusakova_aleksandra|0.1460|2|
+|3823B1PE1|redkina_alina|0.1510|1|
 |**REF**|**REF**|**0.1740**|**-**|
 
 ## 8_gelu_ocl (134217728 elements)
 |Group|Name|Result|Rank|
 |-----|----|------|----|
 |**FAST**|**FAST**|**0.2036**|**-**|
+|3823B1PE1|rusakova_aleksandra|0.2386|2|
+|3823B1PE1|redkina_alina|0.2500|1|
 |**REF**|**REF**|**0.3289**|**-**|
 
 # Tasks Done
+## 3823B1FI1
+|Group|Name|Passed|Score|
+|-----|----|------|-----|
+|3823B1FI1|kosolapov_vitaliy|1/8|62|
+|3823B1FI1|zenin_anton|2/8|128|
+
+Passed: 0
+
+## 3823B1FI2
+|Group|Name|Passed|Score|
+|-----|----|------|-----|
+|3823B1FI2|chyokotov_alexey|1/8|64|
+
+Passed: 0
+
 ## 3823B1PE1
 |Group|Name|Passed|Score|
 |-----|----|------|-----|
-|3823B1PE1|morozov_nikita|1/8|61|
-|3823B1PE1|redkina_alina|4/8|253|
-|3823B1PE1|rusakova_aleksandra|1/8|62|
-|3823B1PE1|tsibareva_ekaterina|2/8|122|
+|3823B1PE1|morozov_nikita|1/8|58|
+|3823B1PE1|otcheskov_semyon|4/8|238|
+|3823B1PE1|redkina_alina|**8/8**|**499**|
+|3823B1PE1|rusakova_aleksandra|**8/8**|**492**|
+|3823B1PE1|shilin_nikita|4/8|239|
+|3823B1PE1|tsibareva_ekaterina|2/8|118|
+|3823B1PE1|zhurin_ivan|1/8|54|
 
-Passed: 0
+Passed: 2
 
 ## 3823B1PE2
 |Group|Name|Passed|Score|
 |-----|----|------|-----|
-|3823B1PE2|klimenko_vladislav|1/8|61|
+|3823B1PE2|klimenko_vladislav|5/8|311|
 |3823B1PE2|kolotukhin_alexander|1/8|62|
-|3823B1PE2|sinev_artem|2/8|127|
-|3823B1PE2|zorin_danila_artemovich|1/8|58|
+|3823B1PE2|kotelnikova_anastasia|1/8|56|
+|3823B1PE2|sinev_artem|2/8|126|
+|3823B1PE2|vasiliev_mikhail|1/8|59|
+|3823B1PE2|zorin_danila_artemovich|4/8|242|
 
 Passed: 0
 
 ## 3823B1PE3
 |Group|Name|Passed|Score|
 |-----|----|------|-----|
-|3823B1PE3|dergachev_arseniy|1/8|64|
+|3823B1PE3|batkov_filipp|2/8|124|
+|3823B1PE3|dergachev_arseniy|2/8|128|
+|3823B1PE3|marin_lev|0/8|0|
 
 Passed: 0
 
-**Total Passed: 0**
+## 3823B1PE4
+|Group|Name|Passed|Score|
+|-----|----|------|-----|
+|3823B1PE4|zaharov_gleb|2/8|128|
+
+Passed: 0
+
+**Total Passed: 2**
 
 ---
 *Maximum Score: 512 (64 per task)*
